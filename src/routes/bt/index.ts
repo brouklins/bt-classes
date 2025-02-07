@@ -32,7 +32,7 @@ const contractSchema = {
             properties: {
                 student_id: { type: "string", minLength: 1 },
                 instructor_id: { type: "string", minLength: 1 },
-                start_date: { type: "string", format: "date-time" }, // ISO 8601 format for date
+                start_date: { type: "string", format: "date-time" }, // ISO 8601 format for date (ano-mes-dia)
                 days_of_week: {
                     type: "array",
                     items: { type: "string", minLength: 1 },
