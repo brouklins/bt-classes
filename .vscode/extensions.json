@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "vscode.typescript-language-features",
+    "vscode.json-language-features"
+  ]
+}
