@@ -7,6 +7,7 @@ import IContractModelMapper from './IContractModelMapper';
 @injectable()
 export default class ContractModelMapperImpl implements IContractModelMapper {
     async contractDtoToContractEntity(contractDTO: ContractModelDTO): Promise<ContractEntity> {
+        console.log("---------------MAPPPER--------------")
 
         const trialPeriodDays = 30;
 
@@ -18,7 +19,7 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
 
         const totalSessions = numberOfWeeks * sessionPerWeek;
 
-        console.debug(contractDTO);
+        console.debug(JSON.stringify(contractDTO));
 
         return {
             id: uuidv4(),
@@ -39,6 +40,7 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
         existingEntity: ContractEntity,
         updateDTO: Partial<ContractModelDTO>
     ): Promise<ContractEntity> {
+        console.log("---------------UPDATE MAPPPER--------------")
 
         // Use a data de início fornecida ou mantenha a existente
         const startDate = updateDTO.start_date ?? existingEntity.start_date;
@@ -54,6 +56,7 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
         const sessionsPerWeek = await this.calculateSessionsPerWeek(schedule);
         const numberOfWeeks = await this.calculateWeeksBetween(startDate, endDate);
         const totalSessions = numberOfWeeks * sessionsPerWeek;
+
 
         return {
             id: existingEntity.id,
