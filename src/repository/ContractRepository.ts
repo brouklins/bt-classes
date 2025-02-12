@@ -38,6 +38,7 @@ export default class ContractRepository {
                 end_date,
                 sessions_per_week,
                 days_of_week,
+                schedule,
                 total_sessions,
                 completed_sessions,
                 status
