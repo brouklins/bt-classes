@@ -22,6 +22,8 @@ export default class ConctractController {
 
             const userId = decodedJwt?.sub as string;
 
+            console.log(request.body)
+
             const payload = request.body as ContractModelDTO;
 
             const contractId = await this.contractUseCase.createContract(payload, userId);
