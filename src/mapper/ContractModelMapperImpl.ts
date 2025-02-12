@@ -7,33 +7,41 @@ import IContractModelMapper from './IContractModelMapper';
 @injectable()
 export default class ContractModelMapperImpl implements IContractModelMapper {
     async contractDtoToContractEntity(contractDTO: ContractModelDTO): Promise<ContractEntity> {
-        console.log("---------------MAPPPER--------------")
+        try {
 
-        const trialPeriodDays = 30;
+            console.log("---------------MAPPPER--------------")
 
-        const sessionPerWeek = await this.calculateSessionsPerWeek(contractDTO.schedule);
+            const trialPeriodDays = 30;
 
-        const endDate = new Date(contractDTO.start_date.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
+            const sessionPerWeek = await this.calculateSessionsPerWeek(contractDTO.schedule);
 
-        const numberOfWeeks = await this.calculateWeeksBetween(contractDTO.start_date, endDate);
+            const endDate = new Date(contractDTO.start_date.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
 
-        const totalSessions = numberOfWeeks * sessionPerWeek;
+            const numberOfWeeks = await this.calculateWeeksBetween(contractDTO.start_date, endDate);
 
-        console.debug(JSON.stringify(contractDTO));
+            const totalSessions = numberOfWeeks * sessionPerWeek;
 
-        return {
-            id: uuidv4(),
-            student_id: contractDTO.student_id,
-            instructor_id: contractDTO.instructor_id,
-            start_date: contractDTO.start_date,
-            end_date: endDate,
-            sessions_per_week: sessionPerWeek,
-            days_of_week: contractDTO.days_of_week,
-            schedule: contractDTO.schedule, // Novo campo adicionado
-            completed_sessions: 0,
-            total_sessions: totalSessions,
-            status: 'ACTIVE',
-        };
+            console.debug(JSON.stringify(contractDTO));
+
+            return {
+                id: uuidv4(),
+                student_id: contractDTO.student_id,
+                instructor_id: contractDTO.instructor_id,
+                start_date: contractDTO.start_date,
+                end_date: endDate,
+                sessions_per_week: sessionPerWeek,
+                days_of_week: contractDTO.days_of_week,
+                schedule: contractDTO.schedule, // Novo campo adicionado
+                completed_sessions: 0,
+                total_sessions: totalSessions,
+                status: 'ACTIVE',
+            };
+
+        } catch (error) {
+            console.error('Error on mapping:', error);
+            throw error;
+        }
+
     }
 
     async updateContractEntityFromDTO(
