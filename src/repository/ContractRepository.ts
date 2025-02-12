@@ -42,7 +42,7 @@ export default class ContractRepository {
                 completed_sessions,
                 status
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             `,
                 [
                     entity.id,
@@ -52,6 +52,7 @@ export default class ContractRepository {
                     entity.end_date,
                     entity.sessions_per_week,
                     entity.days_of_week.join(','), // Converte array em string se necessário
+                    entity.schedule,
                     entity.total_sessions,
                     entity.completed_sessions,
                     entity.status,
@@ -88,6 +89,7 @@ export default class ContractRepository {
                 end_date: row.end_date,
                 sessions_per_week: row.sessions_per_week,
                 days_of_week: row.days_of_week.split(','),  // Converte a string de volta para um array
+                schedule: row.schedule,
                 total_sessions: row.total_sessions,
                 completed_sessions: row.completed_sessions,
                 status: row.status
@@ -117,6 +119,7 @@ export default class ContractRepository {
                 end_date: row.end_date,
                 sessions_per_week: row.sessions_per_week,
                 days_of_week: row.days_of_week.split(','),  // Converte a string de volta para um array
+                schedule: row.schedule,
                 total_sessions: row.total_sessions,
                 completed_sessions: row.completed_sessions,
                 status: row.status
@@ -147,6 +150,7 @@ export default class ContractRepository {
                 end_date: row.end_date,
                 sessions_per_week: row.sessions_per_week,
                 days_of_week: row.days_of_week.split(','),  // Converte a string de volta para um array
+                schedule: row.schedule,
                 total_sessions: row.total_sessions,
                 completed_sessions: row.completed_sessions,
                 status: row.status
@@ -177,10 +181,11 @@ export default class ContractRepository {
                 end_date = $4,
                 sessions_per_week = $5,
                 days_of_week = $6,
-                total_sessions = $7,
-                completed_sessions = $8,
-                status = $9
-            WHERE id = $10
+                schedule = $7,
+                total_sessions = $8,
+                completed_sessions = $9,
+                status = $10
+            WHERE id = $11
             `,
                 [
                     entity.student_id,
@@ -189,6 +194,7 @@ export default class ContractRepository {
                     entity.end_date,
                     entity.sessions_per_week,
                     entity.days_of_week.join(','), // Converte o array de volta para uma string
+                    entity.schedule,
                     entity.total_sessions,
                     entity.completed_sessions,
                     entity.status,

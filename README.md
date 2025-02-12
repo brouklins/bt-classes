@@ -26,7 +26,11 @@ Esta função Lambda é responsável por gerenciar o cadastro e a manipulação 
 {
   "student_id": "123e4567-e89b-12d3-a456-426614174000",
   "instructor_id": "123e4567-e89b-12d3-a456-426614174000",
-  "start_date": "2025-01-20",
-  "days_of_week": ["monday", "thursday"],
-  "status": "ACTIVE"
-}
+  "start_date": 2025-01-20,
+  "days_of_week": "['monday', 'thursday']",
+  "schedule": {
+    "monday": "['08:00-09:00', '10:00-11:00']",
+    "thursday": "['13:00-14:00']",
+  },
+  "status": "ACTIVE",
+};
