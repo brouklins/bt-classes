@@ -93,6 +93,8 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
 
     private async calculateSessionsPerWeek(schedule?: { [day: string]: string[] }): Promise<number> {
         if (!schedule) return 0;
-        return Object.keys(schedule).reduce((total, day) => total + schedule[day].length, 0);
+        const totalSession = Object.keys(schedule).reduce((total, day) => total + schedule[day].length, 0);
+        console.debug(`Total Sessions = ${totalSession}`);
+        return totalSession;
     }
 }
