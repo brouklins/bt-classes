@@ -27,6 +27,7 @@ export class PostgresConfig {
                                         end_date DATE NOT NULL,
                                         sessions_per_week INT CHECK (sessions_per_week BETWEEN 1 AND 5),
                                         days_of_week VARCHAR(50) NOT NULL, -- 'Monday,Wednesday'
+                                        schedule JSONB,
                                         total_sessions INT NOT NULL,
                                         completed_sessions INT DEFAULT 0,
                                         status VARCHAR(20) CHECK (status IN ('ACTIVE', 'INACTIVE', 'CANCELED')) NOT NULL

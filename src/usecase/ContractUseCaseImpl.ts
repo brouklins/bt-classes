@@ -15,11 +15,13 @@ export default class ContractUseCaseImpl implements IContractUseCase {
         this.contractModelMapper = contractModelMapper;
     }
 
-    async createContract(contractDto: ContractModelDTO): Promise<string> {
+    async createContract(contractDto: ContractModelDTO, userId: string): Promise<string> {
 
-        const studentRepository = await ContractRepository.create();
+        this.checkUserId(userId, contractDto.instructor_id);
 
-        const exist = await studentRepository.studentContractExist(contractDto.student_id);
+        const contractRepository = await ContractRepository.create();
+
+        const exist = await contractRepository.studentContractExist(contractDto.student_id);
 
         if (exist) {
             throw new CustomError(
@@ -31,7 +33,7 @@ export default class ContractUseCaseImpl implements IContractUseCase {
 
         const entity = await this.contractModelMapper.contractDtoToContractEntity(contractDto);
 
-        await studentRepository.insert(entity);
+        await contractRepository.insert(entity);
 
         return entity.id;
     }
@@ -41,22 +43,7 @@ export default class ContractUseCaseImpl implements IContractUseCase {
         return await contractRepository.listAllContractsByInstructor(instructorId);
 
     }
-    async showContractById(contractId: string): Promise<ContractEntity> {
-        const studentRepository = await ContractRepository.create();
-
-        const exist = await studentRepository.contractExist(contractId);
-
-        if (!exist) {
-            throw new CustomError(
-                404,
-                `Contract ID: ${contractId} does not exist`,
-                "NOT FOUND"
-            );
-        }
-
-        return await studentRepository.findByContractId(contractId);
-    }
-    async updateContract(contractDto: Partial<ContractModelDTO>, contractId: string): Promise<ContractEntity> {
+    async showContractById(contractId: string, userId: string): Promise<ContractEntity> {
         const contractRepository = await ContractRepository.create();
 
         const exist = await contractRepository.contractExist(contractId);
@@ -69,7 +56,26 @@ export default class ContractUseCaseImpl implements IContractUseCase {
             );
         }
 
-        const existingEntity = await this.showContractById(contractId);
+        const targetContract = await contractRepository.findByContractId(contractId);
+
+        this.checkUserId(userId, targetContract.instructor_id);
+
+        return targetContract;
+    }
+    async updateContract(contractDto: Partial<ContractModelDTO>, contractId: string, userId: string): Promise<ContractEntity> {
+        const contractRepository = await ContractRepository.create();
+
+        const exist = await contractRepository.contractExist(contractId);
+
+        if (!exist) {
+            throw new CustomError(
+                404,
+                `Contract ID: ${contractId} does not exist`,
+                "NOT FOUND"
+            );
+        }
+
+        const existingEntity = await this.showContractById(contractId, userId);
 
         const entity = await this.contractModelMapper.updateContractEntityFromDTO(existingEntity, contractDto);
 
@@ -78,7 +84,7 @@ export default class ContractUseCaseImpl implements IContractUseCase {
         return entity;
     }
 
-    async deleteContract(contractId: string): Promise<void> {
+    async deleteContract(contractId: string, userId: string): Promise<void> {
         const contractRepository = await ContractRepository.create();
 
         const exist = await contractRepository.contractExist(contractId);
@@ -91,6 +97,19 @@ export default class ContractUseCaseImpl implements IContractUseCase {
             );
         }
 
+        await this.showContractById(contractId, userId);
+
         await contractRepository.delete(contractId);
+    }
+
+    //Checar se o userid do jwt token é o mesmo userid do contract
+    private checkUserId(jwtUserId: string, targetUserId: string) {
+        if (jwtUserId !== targetUserId) {
+            throw new CustomError(
+                401,
+                `Unauthorized`,
+                "UNAUTHORIZED"
+            );
+        }
     }
 }

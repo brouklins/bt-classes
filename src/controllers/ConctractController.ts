@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
+import decodeJwt from '../external/config/JwtDecode';
 import { ErrorHandler } from '../external/exception/ErrorHandler';
 import ContractModelDTO from '../models/ContractModelDTO';
 import IContractUseCase from '../usecase/IContractUseCase';
@@ -16,9 +17,14 @@ export default class ConctractController {
 
     async create(request: FastifyRequest, reply: FastifyReply) {
         try {
+            const jwtToken = request.headers.authorization as string;
+            const decodedJwt = await decodeJwt(jwtToken);
+
+            const userId = decodedJwt?.sub as string;
+
             const payload = request.body as ContractModelDTO;
 
-            const contractId = await this.contractUseCase.createContract(payload);
+            const contractId = await this.contractUseCase.createContract(payload, userId);
 
             request.log.info('Success on method signup on ConctractController');
             reply.status(201).send({ id: contractId });
@@ -29,7 +35,10 @@ export default class ConctractController {
 
     async list(request: FastifyRequest, reply: FastifyReply) {
         try {
-            const userId = request.headers.userid as string;
+            const jwtToken = request.headers.authorization as string;
+            const decodedJwt = await decodeJwt(jwtToken);
+
+            const userId = decodedJwt?.sub as string;
 
             const res = await this.contractUseCase.listContractsByInstructor(userId);
 
@@ -42,9 +51,14 @@ export default class ConctractController {
 
     async show(request: FastifyRequest, reply: FastifyReply) {
         try {
+            const jwtToken = request.headers.authorization as string;
+            const decodedJwt = await decodeJwt(jwtToken);
+
+            const userId = decodedJwt?.sub as string;
+
             const { id: contractId } = request.params as { id: string };
 
-            const res = await this.contractUseCase.showContractById(contractId);
+            const res = await this.contractUseCase.showContractById(contractId, userId);
 
             request.log.info('Success on method show on ConctractController');
             reply.status(200).send(res);
@@ -55,10 +69,15 @@ export default class ConctractController {
 
     async update(request: FastifyRequest, reply: FastifyReply) {
         try {
+            const jwtToken = request.headers.authorization as string;
+            const decodedJwt = await decodeJwt(jwtToken);
+
+            const userId = decodedJwt?.sub as string;
+
             const { id: contractId } = request.params as { id: string };
             const payload = request.body as Partial<ContractModelDTO>;
 
-            const res = await this.contractUseCase.updateContract(payload, contractId);
+            const res = await this.contractUseCase.updateContract(payload, contractId, userId);
 
             request.log.info('Success on method update on ConctractController');
             reply.status(200).send(res);
@@ -69,9 +88,14 @@ export default class ConctractController {
 
     async delete(request: FastifyRequest, reply: FastifyReply) {
         try {
+            const jwtToken = request.headers.authorization as string;
+            const decodedJwt = await decodeJwt(jwtToken);
+
+            const userId = decodedJwt?.sub as string;
+
             const { id: contractId } = request.params as { id: string };
 
-            await this.contractUseCase.deleteContract(contractId);
+            await this.contractUseCase.deleteContract(contractId, userId);
 
             request.log.info('Success on method delete on ConctractController');
             reply.status(200).send();

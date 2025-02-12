@@ -10,7 +10,7 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
 
         const trialPeriodDays = 30;
 
-        const sessionPerWeek = await this.calculateSessionsPerWeek(contractDTO.days_of_week);
+        const sessionPerWeek = await this.calculateSessionsPerWeek(contractDTO.schedule);
 
         const endDate = new Date(contractDTO.start_date.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
 
@@ -26,6 +26,7 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
             end_date: endDate,
             sessions_per_week: sessionPerWeek,
             days_of_week: contractDTO.days_of_week,
+            schedule: contractDTO.schedule, // Novo campo adicionado
             completed_sessions: 0,
             total_sessions: totalSessions,
             status: 'ACTIVE',
@@ -46,8 +47,9 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
         // Use os dias da semana fornecidos ou mantenha os existentes
         const daysOfWeek = updateDTO.days_of_week ?? existingEntity.days_of_week;
 
-        // Recalcular o número de sessões por semana e total de sessões
-        const sessionsPerWeek = await this.calculateSessionsPerWeek(daysOfWeek);
+        const schedule = updateDTO.schedule ?? existingEntity.schedule; // Incluído o schedule
+
+        const sessionsPerWeek = await this.calculateSessionsPerWeek(schedule);
         const numberOfWeeks = await this.calculateWeeksBetween(startDate, endDate);
         const totalSessions = numberOfWeeks * sessionsPerWeek;
 
@@ -59,6 +61,7 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
             end_date: endDate,
             sessions_per_week: sessionsPerWeek,
             days_of_week: daysOfWeek,
+            schedule: schedule, // Novo campo adicionado
             completed_sessions: existingEntity.completed_sessions,
             total_sessions: totalSessions,
             status: updateDTO.status ?? existingEntity.status
@@ -71,7 +74,8 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
         return Math.ceil((endDate.getTime() - startDate.getTime()) / oneWeekMilliseconds);
     }
 
-    private async calculateSessionsPerWeek(daysOfWeek: string[]): Promise<number> {
-        return daysOfWeek.length;
+    private async calculateSessionsPerWeek(schedule?: { [day: string]: string[] }): Promise<number> {
+        if (!schedule) return 0;
+        return Object.keys(schedule).reduce((total, day) => total + schedule[day].length, 0);
     }
 }
