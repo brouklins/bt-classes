@@ -17,11 +17,17 @@ export default class ContractUseCaseImpl implements IContractUseCase {
 
     async createContract(contractDto: ContractModelDTO, userId: string): Promise<string> {
 
+        console.log("---------------START TO CREATE--------------")
+
         this.checkUserId(userId, contractDto.instructor_id);
+
+        console.log("---------------USER ID CHECKED--------------")
 
         const contractRepository = await ContractRepository.create();
 
         const exist = await contractRepository.studentContractExist(contractDto.student_id);
+
+        console.log("---------------STUDENT EXIST--------------")
 
         if (exist) {
             throw new CustomError(
@@ -32,6 +38,8 @@ export default class ContractUseCaseImpl implements IContractUseCase {
         }
 
         const entity = await this.contractModelMapper.contractDtoToContractEntity(contractDto);
+
+        console.log("---------------FEITO MAPPER--------------")
 
         await contractRepository.insert(entity);
 
