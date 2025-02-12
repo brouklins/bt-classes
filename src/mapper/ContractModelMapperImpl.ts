@@ -18,6 +18,8 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
 
         const totalSessions = numberOfWeeks * sessionPerWeek;
 
+        console.debug(contractDTO);
+
         return {
             id: uuidv4(),
             student_id: contractDTO.student_id,
