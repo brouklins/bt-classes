@@ -15,9 +15,11 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
 
             const sessionPerWeek = await this.calculateSessionsPerWeek(contractDTO.schedule);
 
-            const endDate = new Date(contractDTO.start_date.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
+            const startDate = new Date(contractDTO.start_date);
 
-            const numberOfWeeks = await this.calculateWeeksBetween(contractDTO.start_date, endDate);
+            const endDate = new Date(startDate.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
+
+            const numberOfWeeks = await this.calculateWeeksBetween(startDate, endDate);
 
             const totalSessions = numberOfWeeks * sessionPerWeek;
 
@@ -27,7 +29,7 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
                 id: uuidv4(),
                 student_id: contractDTO.student_id,
                 instructor_id: contractDTO.instructor_id,
-                start_date: contractDTO.start_date,
+                start_date: startDate,
                 end_date: endDate,
                 sessions_per_week: sessionPerWeek,
                 days_of_week: contractDTO.days_of_week,
@@ -51,7 +53,9 @@ export default class ContractModelMapperImpl implements IContractModelMapper {
         console.log("---------------UPDATE MAPPPER--------------")
 
         // Use a data de início fornecida ou mantenha a existente
-        const startDate = updateDTO.start_date ?? existingEntity.start_date;
+        const exctractStartDate = updateDTO.start_date ?? existingEntity.start_date;
+
+        const startDate = new Date(exctractStartDate);
 
         // Recalcular a data de término fixando 30 dias após a data de início
         const endDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
