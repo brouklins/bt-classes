@@ -21,6 +21,8 @@ export const handler = async (event: any, context: any): Promise<any> => {
         if (authContext) {
             event.headers['authContext'] = JSON.stringify(authContext);
         }
+        console.log('-------EVENT LOG---------')
+        console.debug(event);
         // Evento HTTP (ou outros eventos)
         return await proxy(event, context);
 
