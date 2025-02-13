@@ -67,7 +67,7 @@ const updateContractSchema = {
                             items: { type: "string", pattern: "^[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}$" },
                         },
                     },
-                    additionalProperties: false,
+                    additionalProperties: true,
                 },
                 status: {
                     type: "string",
