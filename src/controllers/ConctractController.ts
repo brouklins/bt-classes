@@ -22,7 +22,8 @@ export default class ConctractController {
 
             const userId = decodedJwt?.sub as string;
 
-            console.log(request.body)
+            console.log('-------REQUEST.BODY------------')
+            console.debug(request.body)
 
             const payload = request.body as ContractModelDTO;
 
