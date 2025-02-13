@@ -31,7 +31,6 @@ const contractSchema = {
                     patternProperties: {
                         "^[a-zA-Z]+$": {
                             type: "array",
-                            items: { type: "string", pattern: "^[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}$" },
                         },
                     },
                     additionalProperties: true,
@@ -63,8 +62,7 @@ const updateContractSchema = {
                     type: "object",
                     patternProperties: {
                         "^[a-zA-Z]+$": {
-                            type: "array",
-                            items: { type: "string", pattern: "^[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}$" },
+                            type: "array"
                         },
                     },
                     additionalProperties: true,
