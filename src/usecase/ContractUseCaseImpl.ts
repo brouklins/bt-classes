@@ -121,6 +121,7 @@ export default class ContractUseCaseImpl implements IContractUseCase {
         console.debug(newReferenceDate);
 
         const startAndEndofTheWeek = this.getWeekStartAndEnd(newReferenceDate);
+        console.debug(startAndEndofTheWeek);
 
         return await contractRepository.selectWeeklyCalendar(userId, startAndEndofTheWeek.startOfWeek, startAndEndofTheWeek.endOfWeek);
 
