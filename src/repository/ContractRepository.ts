@@ -323,6 +323,7 @@ export default class ContractRepository {
     }
 
     async selectWeeklyCalendar(instructorId: string, startOfWeek: Date, endOfWeek: Date): Promise<WeeklyCalendarModel> {
+        console.log('-------STARTING CALENDAR REPOSITORY--------');
         const client = await this.pool.connect();
 
         type WeekDays = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
@@ -361,7 +362,7 @@ export default class ContractRepository {
                     }
                 });
             });
-
+            console.debug(calendar);
             return calendar;
 
         } catch (error: any) {

@@ -113,9 +113,12 @@ export default class ContractUseCaseImpl implements IContractUseCase {
 
     async showWeeklyCalendar(userId: string, referenceDate: Date): Promise<WeeklyCalendarModel> {
 
+        console.log('------------STARTING CALENDAR USECASE---------')
         const contractRepository = await ContractRepository.create();
 
         const newReferenceDate = new Date(referenceDate);
+
+        console.debug(newReferenceDate);
 
         const startAndEndofTheWeek = this.getWeekStartAndEnd(newReferenceDate);
 
