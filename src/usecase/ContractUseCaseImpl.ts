@@ -3,6 +3,7 @@ import { CustomError } from "../external/exception/CustomError";
 import IContractModelMapper from "../mapper/IContractModelMapper";
 import ContractEntity from "../models/ContractEntity";
 import { default as ContractModelDTO } from "../models/ContractModelDTO";
+import WeeklyCalendarModel from "../models/WeeklyCalendarModel";
 import ContractRepository from "../repository/ContractRepository";
 import IContractUseCase from "./IContractUseCase";
 
@@ -110,6 +111,18 @@ export default class ContractUseCaseImpl implements IContractUseCase {
         await contractRepository.delete(contractId);
     }
 
+    async showWeeklyCalendar(userId: string, referenceDate: Date): Promise<WeeklyCalendarModel> {
+
+        const contractRepository = await ContractRepository.create();
+
+        const newReferenceDate = new Date(referenceDate);
+
+        const startAndEndofTheWeek = this.getWeekStartAndEnd(newReferenceDate);
+
+        return await contractRepository.selectWeeklyCalendar(userId, startAndEndofTheWeek.startOfWeek, startAndEndofTheWeek.endOfWeek);
+
+    }
+
     //Checar se o userid do jwt token é o mesmo userid do contract
     private checkUserId(jwtUserId: string, targetUserId: string) {
         if (jwtUserId !== targetUserId) {
@@ -119,5 +132,15 @@ export default class ContractUseCaseImpl implements IContractUseCase {
                 "UNAUTHORIZED"
             );
         }
+    }
+
+    private getWeekStartAndEnd(referenceDate: Date): { startOfWeek: Date, endOfWeek: Date } {
+        const startOfWeek = new Date(referenceDate);
+        startOfWeek.setDate(referenceDate.getDate() - referenceDate.getDay());
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+        return { startOfWeek, endOfWeek };
     }
 }
