@@ -1,7 +1,7 @@
 
 import { Pool } from 'pg';
 import { PostgresConfig } from '../external/config/PostgresConfig';
-import ContractEntity from '../models/ContractEntity';
+import ContractEntity, { Schedule } from '../models/ContractEntity';
 import WeeklyCalendarModel from '../models/WeeklyCalendarModel';
 
 export default class ContractRepository {
@@ -326,7 +326,7 @@ export default class ContractRepository {
         console.log('-------STARTING CALENDAR REPOSITORY--------');
         const client = await this.pool.connect();
 
-        type WeekDays = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+        type WeekDays = 'Segunda' | 'Terça' | 'Quarta' | 'Quinta' | 'Sexta' | 'Sábado' | 'Domingo';
 
         await client.query('SET search_path TO bt;');
 
@@ -341,27 +341,29 @@ export default class ContractRepository {
                 [instructorId, endOfWeek, startOfWeek]
             );
 
-            console.log('--------------SQL QUERY RESULT--------')
+            console.log('--------------SQL QUERY RESULT--------');
             console.debug(result);
 
             const calendar: WeeklyCalendarModel = {
-                monday: [],
-                tuesday: [],
-                wednesday: [],
-                thursday: [],
-                friday: [],
-                saturday: [],
-                sunday: []
+                Segunda: [],
+                Terça: [],
+                Quarta: [],
+                Quinta: [],
+                Sexta: [],
+                Sábado: [],
+                Domingo: []
             };
 
             result.rows.forEach(row => {
                 const days: string[] = row.days_of_week.split(',');
-                const schedule = row.schedule;
+                const schedule: Schedule = row.schedule;
 
                 days.forEach(day => {
-                    const dayLower = day.toLowerCase() as WeekDays;
-                    if (calendar[dayLower] && Array.isArray(schedule[day])) {
-                        calendar[dayLower] = calendar[dayLower].concat(schedule[day]);
+                    const dayTrimmed = day.trim() as WeekDays;
+                    if (schedule[dayTrimmed]) {
+                        // Use um Set para eliminar duplicatas
+                        const uniqueTimes = new Set(calendar[dayTrimmed].concat(schedule[dayTrimmed]));
+                        calendar[dayTrimmed] = Array.from(uniqueTimes);
                     }
                 });
             });
@@ -375,5 +377,4 @@ export default class ContractRepository {
             client.release();
         }
     }
-
 }
