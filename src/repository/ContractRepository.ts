@@ -2,6 +2,7 @@
 import { Pool } from 'pg';
 import { PostgresConfig } from '../external/config/PostgresConfig';
 import ContractEntity from '../models/ContractEntity';
+import WeeklyCalendarModel from '../models/WeeklyCalendarModel';
 
 export default class ContractRepository {
     private readonly pool: Pool;
@@ -317,6 +318,56 @@ export default class ContractRepository {
             throw error; // Relança o erro para ser tratado pelo chamador
         } finally {
             // Libera o cliente de volta para o pool de conexões
+            client.release();
+        }
+    }
+
+    async selectWeeklyCalendar(instructorId: string, startOfWeek: Date, endOfWeek: Date): Promise<WeeklyCalendarModel> {
+        const client = await this.pool.connect();
+
+        type WeekDays = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+
+        await client.query('SET search_path TO bt;');
+
+        try {
+            const result = await client.query(
+                `SELECT days_of_week, schedule 
+             FROM bt.contracts 
+             WHERE instructor_id = $1 
+             AND start_date <= $2::date 
+             AND end_date >= $3::date 
+             AND status = 'ACTIVE'`,
+                [instructorId, endOfWeek, startOfWeek]
+            );
+
+            const calendar: WeeklyCalendarModel = {
+                monday: [],
+                tuesday: [],
+                wednesday: [],
+                thursday: [],
+                friday: [],
+                saturday: [],
+                sunday: []
+            };
+
+            result.rows.forEach(row => {
+                const days: string[] = row.days_of_week.split(',');
+                const schedule = row.schedule;
+
+                days.forEach(day => {
+                    const dayLower = day.toLowerCase() as WeekDays;
+                    if (calendar[dayLower] && Array.isArray(schedule[day])) {
+                        calendar[dayLower] = calendar[dayLower].concat(schedule[day]);
+                    }
+                });
+            });
+
+            return calendar;
+
+        } catch (error: any) {
+            console.error('Error fetching data from postgres:', error);
+            throw error;
+        } finally {
             client.release();
         }
     }

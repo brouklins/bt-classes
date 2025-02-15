@@ -106,4 +106,24 @@ export default class ConctractController {
             ErrorHandler.handleErrors(error, reply);
         }
     }
+
+    async showWeeklyCalendar(request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const jwtToken = request.headers.authorization as string;
+            const decodedJwt = await decodeJwt(jwtToken);
+
+            const userId = decodedJwt?.sub as string;
+
+            const query = request.query as any;
+
+            const refDate = query.referenceDate as Date
+
+            const res = await this.contractUseCase.showWeeklyCalendar(userId, refDate);
+
+            request.log.info('Success on method show on ConctractController');
+            reply.status(200).send(res);
+        } catch (error) {
+            ErrorHandler.handleErrors(error, reply);
+        }
+    }
 }
