@@ -1,11 +1,11 @@
 interface WeeklyCalendarModel {
-    monday: string[];
-    tuesday: string[];
-    wednesday: string[];
-    thursday: string[];
-    friday: string[];
-    saturday: string[];
-    sunday: string[];
+    Segunda: string[];
+    Terça: string[];
+    Quarta: string[];
+    Quinta: string[];
+    Sexta: string[];
+    Sábado: string[];
+    Domingo: string[];
 }
 
 export default WeeklyCalendarModel;

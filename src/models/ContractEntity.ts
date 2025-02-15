@@ -1,4 +1,4 @@
-interface Schedule {
+export interface Schedule {
     [day: string]: string[]; // Mapeia o dia da semana para um array de horários, ex: ['08:00-09:00', '10:00-11:00']
 }
 
