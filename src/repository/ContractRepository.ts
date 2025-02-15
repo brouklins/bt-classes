@@ -341,6 +341,9 @@ export default class ContractRepository {
                 [instructorId, endOfWeek, startOfWeek]
             );
 
+            console.log('--------------SQL QUERY RESULT--------')
+            console.debug(result);
+
             const calendar: WeeklyCalendarModel = {
                 monday: [],
                 tuesday: [],
