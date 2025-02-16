@@ -332,7 +332,7 @@ export default class ContractRepository {
 
         try {
             const result = await client.query(
-                `SELECT days_of_week, schedule, end_date 
+                `SELECT days_of_week, schedule 
              FROM bt.contracts 
              WHERE instructor_id = $1 
              AND start_date <= $2::date 
@@ -354,73 +354,19 @@ export default class ContractRepository {
                 Domingo: []
             };
 
-            const diasDaSemanaENumeros: { [key in WeekDays]: number[] } = {
-                Segunda: [],
-                Terça: [],
-                Quarta: [],
-                Quinta: [],
-                Sexta: [],
-                Sábado: [],
-                Domingo: []
-            };
-
-            const currentDate = new Date(startOfWeek);
-            const endDate = new Date(endOfWeek);
-
-            while (currentDate <= endDate) {
-                const dayOfWeek = currentDate.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
-                const dayOfMonth = currentDate.getDate();
-
-                switch (dayOfWeek) {
-                    case 0:
-                        diasDaSemanaENumeros.Domingo.push(dayOfMonth);
-                        break;
-                    case 1:
-                        diasDaSemanaENumeros.Segunda.push(dayOfMonth);
-                        break;
-                    case 2:
-                        diasDaSemanaENumeros.Terça.push(dayOfMonth);
-                        break;
-                    case 3:
-                        diasDaSemanaENumeros.Quarta.push(dayOfMonth);
-                        break;
-                    case 4:
-                        diasDaSemanaENumeros.Quinta.push(dayOfMonth);
-                        break;
-                    case 5:
-                        diasDaSemanaENumeros.Sexta.push(dayOfMonth);
-                        break;
-                    case 6:
-                        diasDaSemanaENumeros.Sábado.push(dayOfMonth);
-                        break;
-                }
-
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
             result.rows.forEach(row => {
                 const days: string[] = row.days_of_week.split(',');
                 const schedule: Schedule = row.schedule;
-                const contractEndDate = new Date(row.end_date);
 
                 days.forEach(day => {
                     const dayTrimmed = day.trim() as WeekDays;
                     if (schedule[dayTrimmed]) {
+                        // Use um Set para eliminar duplicatas
                         const uniqueTimes = new Set(calendar[dayTrimmed].concat(schedule[dayTrimmed]));
-
-                        const validTimes = Array.from(uniqueTimes).filter(time => {
-                            const monthDayNumber = parseInt(time.split(':')[0], 10); // Ajuste conforme o formato real
-                            const correspondingDate = new Date(startOfWeek);
-                            correspondingDate.setDate(monthDayNumber);
-
-                            return diasDaSemanaENumeros[dayTrimmed].includes(monthDayNumber) && correspondingDate <= contractEndDate;
-                        });
-
-                        calendar[dayTrimmed] = validTimes;
+                        calendar[dayTrimmed] = Array.from(uniqueTimes);
                     }
                 });
             });
-
             console.debug(calendar);
             return calendar;
 
