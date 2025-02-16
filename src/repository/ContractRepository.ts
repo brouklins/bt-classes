@@ -357,13 +357,22 @@ export default class ContractRepository {
             result.rows.forEach(row => {
                 const days: string[] = row.days_of_week.split(',');
                 const schedule: Schedule = row.schedule;
+                const endDate = new Date(row.end_date); // Supondo que "end_date" esteja no formato correto
 
                 days.forEach(day => {
                     const dayTrimmed = day.trim() as WeekDays;
+
+                    // Verifique se o dia está dentro do intervalo do contrato
                     if (schedule[dayTrimmed]) {
-                        // Use um Set para eliminar duplicatas
-                        const uniqueTimes = new Set(calendar[dayTrimmed].concat(schedule[dayTrimmed]));
-                        calendar[dayTrimmed] = Array.from(uniqueTimes);
+                        const dayIndex = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'].indexOf(dayTrimmed);
+                        const currentWeekDay = new Date(startOfWeek);
+                        currentWeekDay.setDate(startOfWeek.getDate() + dayIndex);
+
+                        // Adicione ao calendário apenas se o dia da aula for anterior ou igual à data de término do contrato
+                        if (currentWeekDay <= endDate) {
+                            const uniqueTimes = new Set(calendar[dayTrimmed].concat(schedule[dayTrimmed]));
+                            calendar[dayTrimmed] = Array.from(uniqueTimes);
+                        }
                     }
                 });
             });
