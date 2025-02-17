@@ -332,7 +332,7 @@ export default class ContractRepository {
 
         try {
             const result = await client.query(
-                `SELECT days_of_week, schedule 
+                `SELECT days_of_week, schedule, end_date 
              FROM bt.contracts 
              WHERE instructor_id = $1 
              AND start_date <= $2::date 
@@ -354,19 +354,34 @@ export default class ContractRepository {
                 Domingo: []
             };
 
+            const daysOfWeekMap: Record<WeekDays, number> = {
+                'Segunda': 1,
+                'Terça': 2,
+                'Quarta': 3,
+                'Quinta': 4,
+                'Sexta': 5,
+                'Sábado': 6,
+                'Domingo': 0
+            };
+
             result.rows.forEach(row => {
                 const days: string[] = row.days_of_week.split(',');
                 const schedule: Schedule = row.schedule;
+                const contractEndDate = new Date(row.end_date);
 
                 days.forEach(day => {
                     const dayTrimmed = day.trim() as WeekDays;
-                    if (schedule[dayTrimmed]) {
-                        // Use um Set para eliminar duplicatas
+                    const dayIndex = daysOfWeekMap[dayTrimmed];
+                    const dateForDay = new Date(startOfWeek);
+                    dateForDay.setDate(startOfWeek.getDate() + dayIndex);
+
+                    if (schedule[dayTrimmed] && dateForDay <= contractEndDate) {
                         const uniqueTimes = new Set(calendar[dayTrimmed].concat(schedule[dayTrimmed]));
                         calendar[dayTrimmed] = Array.from(uniqueTimes);
                     }
                 });
             });
+
             console.debug(calendar);
             return calendar;
 
