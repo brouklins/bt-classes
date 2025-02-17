@@ -332,7 +332,7 @@ export default class ContractRepository {
 
         try {
             const result = await client.query(
-                `SELECT days_of_week, schedule, end_date 
+                `SELECT days_of_week, schedule, end_date, start_date 
              FROM bt.contracts 
              WHERE instructor_id = $1 
              AND start_date <= $2::date 
@@ -367,6 +367,7 @@ export default class ContractRepository {
             result.rows.forEach(row => {
                 const days: string[] = row.days_of_week.split(',');
                 const schedule: Schedule = row.schedule;
+                const contractStartDate = new Date(row.start_date);
                 const contractEndDate = new Date(row.end_date);
 
                 days.forEach(day => {
@@ -375,7 +376,7 @@ export default class ContractRepository {
                     const dateForDay = new Date(startOfWeek);
                     dateForDay.setDate(startOfWeek.getDate() + dayIndex);
 
-                    if (schedule[dayTrimmed] && dateForDay <= contractEndDate) {
+                    if (schedule[dayTrimmed] && dateForDay <= contractEndDate && dateForDay >= contractStartDate) {
                         const uniqueTimes = new Set(calendar[dayTrimmed].concat(schedule[dayTrimmed]));
                         calendar[dayTrimmed] = Array.from(uniqueTimes);
                     }
