@@ -2,6 +2,7 @@
 import { Pool } from 'pg';
 import { PostgresConfig } from '../external/config/PostgresConfig';
 import ContractEntity, { Schedule } from '../models/ContractEntity';
+import StudentEntity from '../models/StudentEntity';
 import WeeklyCalendarModel from '../models/WeeklyCalendarModel';
 
 export default class ContractRepository {
@@ -388,6 +389,75 @@ export default class ContractRepository {
 
         } catch (error: any) {
             console.error('Error fetching data from postgres:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    async getStudentsWithClassAtTime(instructorId: string, selectedDate: Date, selectedDay: string, targetTime: string): Promise<string[]> {
+        const client = await this.pool.connect();
+
+        await client.query('SET search_path TO bt;');
+
+        try {
+            const result = await client.query(
+                `SELECT student_id, schedule
+             FROM contracts
+             WHERE instructor_id = $1
+             AND status = 'ACTIVE'
+             AND start_date <= $2::date
+             AND end_date >= $2::date
+             AND days_of_week ILIKE '%' || $3 || '%'`,
+                [instructorId, selectedDate, selectedDay]
+            );
+
+            const studentsWithClass: string[] = [];
+
+            result.rows.forEach(row => {
+                const schedule = row.schedule as { [key: string]: string[] };
+                const daySchedule = schedule[selectedDay]; // Obter horários para o dia específico
+
+                if (daySchedule && daySchedule.includes(targetTime)) {
+                    studentsWithClass.push(row.student_id); // Adiciona o aluno se o targetTime estiver no array
+                }
+            });
+
+            return studentsWithClass;
+        } catch (error: any) {
+            console.error('Error fetching data from postgres:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    async getStudentsByIds(studentIds: string[]): Promise<StudentEntity[]> {
+        if (studentIds.length === 0) {
+            return []; // Retorna um array vazio se não houver IDs
+        }
+
+        const client = await this.pool.connect();
+
+        try {
+            const result = await client.query(
+                `SELECT id, user_id AS "userId", name, phone, email
+                 FROM students
+                 WHERE id = ANY($1::varchar[])`,
+                [studentIds]
+            );
+
+            const students: StudentEntity[] = result.rows.map(row => ({
+                id: row.id,
+                userId: row.userId,
+                name: row.name,
+                phone: row.phone,
+                email: row.email
+            }));
+
+            return students;
+        } catch (error: any) {
+            console.error('Error fetching students by IDs:', error);
             throw error;
         } finally {
             client.release();

@@ -11,6 +11,7 @@ const studentRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =
     fastify.put("/contracts/:id", updateContractSchema, contractController.update.bind(contractController));
     fastify.delete("/contracts/:id", contractController.delete.bind(contractController));
     fastify.get("/calendar", contractController.showWeeklyCalendar.bind(contractController));
+    fastify.get("/classes/schedule", contractController.showStudentsClass.bind(contractController));
 
 }
 

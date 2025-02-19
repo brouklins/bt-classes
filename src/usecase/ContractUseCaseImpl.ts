@@ -3,6 +3,7 @@ import { CustomError } from "../external/exception/CustomError";
 import IContractModelMapper from "../mapper/IContractModelMapper";
 import ContractEntity from "../models/ContractEntity";
 import { default as ContractModelDTO } from "../models/ContractModelDTO";
+import StudentEntity from "../models/StudentEntity";
 import WeeklyCalendarModel from "../models/WeeklyCalendarModel";
 import ContractRepository from "../repository/ContractRepository";
 import IContractUseCase from "./IContractUseCase";
@@ -123,7 +124,21 @@ export default class ContractUseCaseImpl implements IContractUseCase {
         const startAndEndofTheWeek = this.getWeekStartAndEnd(newReferenceDate);
         console.debug(startAndEndofTheWeek);
 
-        return await contractRepository.selectWeeklyCalendar(userId, startAndEndofTheWeek.startOfWeek, startAndEndofTheWeek.endOfWeek);
+        const weeklyCalendar = await contractRepository.selectWeeklyCalendar(userId, startAndEndofTheWeek.startOfWeek, startAndEndofTheWeek.endOfWeek);
+
+        return await this.ordenarCalendarioSemanal(weeklyCalendar);
+
+    }
+
+    async showClassByDateAndTime(userId: string, selectedDate: Date, selectedDay: string, targetTime: string): Promise<StudentEntity[]> {
+
+        const contractRepository = await ContractRepository.create();
+
+        const newSelectedDate = new Date(selectedDate);
+
+        const stuidentsList = await contractRepository.getStudentsWithClassAtTime(userId, newSelectedDate, selectedDay, targetTime);
+
+        return await contractRepository.getStudentsByIds(stuidentsList);
 
     }
 
@@ -146,5 +161,29 @@ export default class ContractUseCaseImpl implements IContractUseCase {
         endOfWeek.setDate(startOfWeek.getDate() + 6);
 
         return { startOfWeek, endOfWeek };
+    }
+
+    private async ordenarCalendarioSemanal(calendarioSemanal: WeeklyCalendarModel): Promise<WeeklyCalendarModel> {
+        // Função para ordenar os horários
+        const ordenarPorHora = (horarios: string[]): string[] => {
+            return horarios.sort((a, b) => {
+                const [horaA, minutoA] = a.split(':').map(Number);
+                const [horaB, minutoB] = b.split(':').map(Number);
+
+                // Ordena primeiro por hora e depois por minuto
+                return horaA - horaB || minutoA - minutoB;
+            });
+        };
+
+        // Retorna um novo objeto com os arrays ordenados
+        return {
+            Segunda: ordenarPorHora(calendarioSemanal.Segunda),
+            Terça: ordenarPorHora(calendarioSemanal.Terça),
+            Quarta: ordenarPorHora(calendarioSemanal.Quarta),
+            Quinta: ordenarPorHora(calendarioSemanal.Quinta),
+            Sexta: ordenarPorHora(calendarioSemanal.Sexta),
+            Sábado: ordenarPorHora(calendarioSemanal.Sábado),
+            Domingo: ordenarPorHora(calendarioSemanal.Domingo),
+        };
     }
 }
